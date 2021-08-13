@@ -388,6 +388,7 @@ namespace Sqlbi.PbiPushDataset
                 List<object> rows = new List<object>();
                 string tableName = string.Empty;
                 string[] fieldNames = new string[reader.FieldCount];
+                int totalRows = 0;
                 // Prepare table and field names
                 for (int col = 0; col < reader.FieldCount; col++)
                 {
@@ -434,6 +435,7 @@ namespace Sqlbi.PbiPushDataset
                         }
                     }
                     rows.Add(rowPushData);
+                    totalRows += rows.Count;
 
                     if (rows.Count >= MAX_ROWS_PER_POST)
                     {
@@ -445,7 +447,7 @@ namespace Sqlbi.PbiPushDataset
                 }
                 refreshingTable?.Invoke(tableName, rows.Count);
                 await _powerBIClient.Datasets.PostRowsInGroupAsync(groupId, datasetId.ToString(), tableName, new PostRowsRequest(rows));
-                refreshedTables.Add((tableName,rows.Count));
+                refreshedTables.Add((tableName, totalRows));
             } while (reader.NextResult());
 
             return refreshedTables;
