@@ -13,7 +13,7 @@
 	<PackageIconUrl>https://www.sqlbi.com/wp-content/uploads/PbiPushDataset.svg</PackageIconUrl>
     <PackageIcon>PbiPushDataset.png</PackageIcon>
 	<PackageTags>Power BI, Push Dataset</PackageTags>
-	<Version>0.9.8</Version>
+	<Version>0.9.9</Version>
   </PropertyGroup>
 	
 	<ItemGroup>

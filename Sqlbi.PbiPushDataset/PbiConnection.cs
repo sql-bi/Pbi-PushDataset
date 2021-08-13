@@ -435,17 +435,18 @@ namespace Sqlbi.PbiPushDataset
                         }
                     }
                     rows.Add(rowPushData);
-                    totalRows += rows.Count;
 
                     if (rows.Count >= MAX_ROWS_PER_POST)
                     {
                         refreshingTable?.Invoke(tableName, rows.Count);
+                        totalRows += rows.Count;
                         await _powerBIClient.Datasets.PostRowsInGroupAsync(groupId, datasetId.ToString(), tableName, new PostRowsRequest(rows));
                         rows = new List<object>();
                     }
 
                 }
                 refreshingTable?.Invoke(tableName, rows.Count);
+                totalRows += rows.Count;
                 await _powerBIClient.Datasets.PostRowsInGroupAsync(groupId, datasetId.ToString(), tableName, new PostRowsRequest(rows));
                 refreshedTables.Add((tableName, totalRows));
             } while (reader.NextResult());
