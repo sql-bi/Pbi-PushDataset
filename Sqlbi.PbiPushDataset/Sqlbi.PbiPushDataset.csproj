@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<Company>SQLBI</Company>
+	<Authors>Marco Russo</Authors>
+	<Product>Power BI Push Dataset Library</Product>
+	<Description>Validate and translate regular Tabular models in Push Datasets, also providing helper functions to clear, populate, and simulate real-time transactions.</Description>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<RepositoryUrl>https://github.com/sql-bi/Pbi-PushDataset</RepositoryUrl>
+	<PackageProjectUrl>https://github.com/sql-bi/Pbi-PushDataset</PackageProjectUrl>
+	<PackageIconUrl>https://www.sqlbi.com/wp-content/uploads/PbiPushDataset.svg</PackageIconUrl>
+    <PackageIcon>PbiPushDataset.png</PackageIcon>
+	<PackageTags>Power BI, Push Dataset</PackageTags>
+	<Version>0.9.8</Version>
+  </PropertyGroup>
+	
+	<ItemGroup>
+		<None Remove="*.nupkg" />
+		<None Include="images\PbiPushDataset.png" Pack="true" PackagePath="." />
+	</ItemGroup>
+
+	<ItemGroup>
+    <PackageReference Include="Microsoft.AnalysisServices.AdomdClient.NetCore.retail.amd64" Version="19.18.0" />
+    <PackageReference Include="Microsoft.AnalysisServices.NetCore.retail.amd64" Version="19.18.0" />
+    <PackageReference Include="Microsoft.PowerBI.Api" Version="3.22.0" />
+    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="2.3.22" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+</Project>
