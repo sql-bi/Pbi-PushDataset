@@ -72,10 +72,31 @@ This is a sample of the simulator configuration file.
                 {
                     "name": "StoreKey",
                     "type": "List",
-                    "allowedValues": [550,999999,400,210,585,605,230,620,190,465,180,420,290,670,300,80,510,590,610,430,440,450,35,200,540,170,90,650,380,50,240,570,100,220,270,370,560,500,490,360,330,630,140,470,10,255,660,340,310,40,130,530,390,160,410,480,320,260,74,60,150,120,72,280,20,250,350,460,580,520,110,30,70,600]
+                    "allowedValues": [550,999999,400,210,585,605,230,620,190,465,180,580,520,110,30,70,600]
                 }
             ]
         }
     ]
 }
 ```
+
+## PbiPushTools
+The PbiPushTools command-line tool supports the following commands:
+* **clear**: Clear all the tables of a Push Dataset. Corresponds to the `Clear-PushDataset` verb of the PowerShell cmdlet.
+* **check**: Validate the model for a Push Dataset. Corresponds to the `Confirm-PushDataset` verb of the PowerShell cmdlet.
+* **generate**: Generate a model compatible with a Push Dataset. Corresponds to the `New-PushDataset` verb of the PowerShell cmdlet.
+* **publish**: Publish model as a Push Dataset. Corresponds to the `Publish-PushDataset` verb of the PowerShell cmdlet.
+* **alter**: Alter model published as a Push Dataset. Corresponds to the `Set-PushDataset` verb of the PowerShell cmdlet.
+* **refresh**: Refresh a Push Dataset executing specified DAX queries. Corresponds to the `Update-PushDataset` verb of the PowerShell cmdlet.
+* **simulate**: Simulate real-time updates to Push Dataset. Corresponds to the `Enter-PushDataset` verb of the PowerShell cmdlet.
+Use `PbiPushTools.exe -?` to get help and usage information. Add the command to get information about the parameters of each command. For example, `PbiPushTools.exe -? publish` shows the arguments for the publish command.
+
+## Sqlbi.PbiPushTools
+The PowerShell cmdlet supports the following verbs:
+* **Clear-PushDataset**: Clear all the tables of a Push Dataset. 
+* **Confirm-PushDataset**: Validate the model for a Push Dataset. 
+* **Enter-PushDataset**: Simulate real-time updates to Push Dataset. 
+* **New-PushDataset**: Generate a model compatible with a Push Dataset. 
+* **Publish-PushDataset**: Publish model as a Push Dataset. 
+* **Set-PushDataset**: Alter model published as a Push Dataset. 
+* **Update-PushDataset**: Refresh a Push Dataset executing specified DAX queries. 
