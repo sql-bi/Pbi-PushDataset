@@ -7,7 +7,7 @@
 
 
 	<ItemGroup>
-    <PackageReference Include="Microsoft.AnalysisServices.NetCore.retail.amd64" Version="19.22.5" />
+    <PackageReference Include="Microsoft.AnalysisServices.NetCore.retail.amd64" Version="19.24.4" />
     <PackageReference Include="PowerShellStandard.Library" Version="7.0.0-preview.1" />
     <PackageReference Include="System.CommandLine.Rendering" Version="0.3.0-alpha.21216.1" />
   </ItemGroup>
