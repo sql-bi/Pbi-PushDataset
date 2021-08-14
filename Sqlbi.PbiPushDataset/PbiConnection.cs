@@ -24,19 +24,56 @@ namespace Sqlbi.PbiPushDataset
         }
     }
 
+    /// <summary>
+    /// Manage the connection with the Power BI REST API to manage a Push Dataset.
+    /// The push dataset is created starting from a Tabular Object Model (TOM) structure, removing the 
+    /// unsupported features (like user hierarchies and inactive relationships).
+    /// The push dataset can be initialized reading data from another Power BI dataset.
+    /// The class handles service principal authentication and user authentication for the refresh operation.
+    /// The class also includes a simulator that creates and write rows according to a configuration table.
+    /// </summary>
     public class PbiConnection
     {
         // Power BI API settings
         private const string resource = "https://analysis.windows.net/powerbi/api";
         private const string ApiUrl = "https://api.powerbi.com";
 
+        /// <summary>
+        /// The Tenant ID of Azure Active Directory. See https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-how-to-find-tenant
+        /// </summary>
         public string TenantId { get; set; }
+
+        /// <summary>
+        /// This is the service principal for the Power BI REST API authentication. 
+        /// Usually, the tool runs in a scheduled unattended batch. 
+        /// The service principal is a string with a global unique identifier. 
+        /// For more details about the service principal, read https://www.sqlbi.com/articles/creating-a-service-principal-account-for-power-bi-api/
+        /// </summary>
         public string PrincipalId { get; set; }
+
+        /// <summary>
+        /// The client secret for the service principal. 
+        /// For more details about the client secret, read https://www.sqlbi.com/articles/creating-a-service-principal-account-for-power-bi-api/
+        /// </summary>
         public string ClientSecret { get; set; }
 
         // Properties for user authentication (required for Refresh in PbiPushDataset)
+
+        /// <summary>
+        /// The Client ID of the application registered in Azure Active Directory 
+        /// that calls the REST API to update the push dataset. 
+        /// You can see how to register an application and obtain a Client ID in https://www.sqlbi.com/articles/creating-a-service-principal-account-for-power-bi-api/
+        /// </summary>
         public string ClientId { get; set; }
+
+        /// <summary>
+        /// The username to retrieve data from the regular dataset to initialize the push dataset after the daily refresh.
+        /// </summary>
         public string Username { get; set; }
+
+        /// <summary>
+        /// The password to retrieve data from the regular dataset to initialize the push dataset after the daily refresh.
+        /// </summary>
         public string Password { get; set; }
 
         public PbiConnection()
@@ -44,8 +81,16 @@ namespace Sqlbi.PbiPushDataset
         }
 
         private PowerBIClient _powerBIClient;
+
+        /// <summary>
+        /// Returns true if the connection to Power BI is active and already authenticated.
+        /// </summary>
         public bool IsOpen { get => _powerBIClient != null; }
 
+        /// <summary>
+        /// Returns the access token for the service principal
+        /// </summary>
+        /// <returns></returns>
         public async Task<string> GetServicePrincipalToken()
         {
             IConfidentialClientApplication appBuilder = null;
@@ -72,20 +117,25 @@ namespace Sqlbi.PbiPushDataset
                 // The application doesn't have sufficient permissions.
                 // - Did you declare enough app permissions during app creation?
                 // - Did the tenant admin grant permissions to the application?
-                
+
                 throw;
             }
             catch (MsalServiceException ex) when (ex.Message.Contains("AADSTS70011"))
             {
                 // Invalid scope. The scope has to be in the form "https://resourceurl/.default"
                 // Mitigation: Change the scope to be as expected.
-                
+
                 throw;
             }
 
             return result.AccessToken;
         }
 
+        /// <summary>
+        /// Returns the access token for the user-based authentication.
+        /// </summary>
+        /// <param name="serverResource"></param>
+        /// <returns></returns>
         public async Task<string> GetUserAccessToken(string serverResource = null)
         {
             IPublicClientApplication appBuilder = null;
@@ -141,6 +191,11 @@ namespace Sqlbi.PbiPushDataset
             return result.AccessToken;
         }
 
+
+        /// <summary>
+        /// Retrieves the access token for the service principal and connects to Power BI service.
+        /// </summary>
+        /// <returns></returns>
         public async Task Open()
         {
             if (IsOpen) return;
@@ -161,18 +216,18 @@ namespace Sqlbi.PbiPushDataset
             {
                 result = await app.AcquireTokenForClient(scopes).ExecuteAsync();
             }
-            catch (MsalUiRequiredException )
+            catch (MsalUiRequiredException)
             {
                 // The application doesn't have sufficient permissions.
                 // - Did you declare enough app permissions during app creation?
                 // - Did the tenant admin grant permissions to the application?
-                throw; 
+                throw;
             }
             catch (MsalServiceException ex) when (ex.Message.Contains("AADSTS70011"))
             {
                 // Invalid scope. The scope has to be in the form "https://resourceurl/.default"
                 // Mitigation: Change the scope to be as expected.
-                throw; 
+                throw;
             }
 
             #endregion
@@ -181,11 +236,22 @@ namespace Sqlbi.PbiPushDataset
             _powerBIClient = new PowerBIClient(new Uri(ApiUrl), tokenCredentials);
         }
 
-        public async Task<string> CreatePushDataset( 
-            FileInfo model, 
-            Guid groupId, 
-            string datasetName, 
-            bool overwriteExistingDataset, 
+        /// <summary>
+        /// Creates a push dataset in the specified workspace using the TOM model retrieved from a model.bim file.
+        /// </summary>
+        /// <param name="model">Filename containing the TOM model in model.bim forma (JSON).</param>
+        /// <param name="groupId">The Group ID corresponding to the Power BI workspace where you publish the push dataset.</param>
+        /// <param name="datasetName">The name of the push dataset to create.</param>
+        /// <param name="overwriteExistingDataset">TRUE to overwrite an existing dataset, FALSE to raise an exception if the dataset already exists.</param>
+        /// <param name="fifoPolicy">TRUE to use the BasicFIFO retention policy for the new push dataset, FALSE to use None as a retention policy.</param>
+        /// <param name="unsupportedMeasureAction">Action to run for unsupported measures found in the model.</param>
+        /// <param name="unsupportedRelationshipAction">Action to run for unsupported relationships found in the model.</param>
+        /// <returns>Dataset ID of the push dataset.</returns>
+        public async Task<string> CreatePushDataset(
+            FileInfo model,
+            Guid groupId,
+            string datasetName,
+            bool overwriteExistingDataset,
             bool fifoPolicy,
             Action<TabModel.Measure> unsupportedMeasureAction,
             Action<TabModel.Relationship> unsupportedRelationshipAction)
@@ -203,25 +269,32 @@ namespace Sqlbi.PbiPushDataset
                 }
                 else
                 {
-                    throw new PbiPushDatasetException( this, $"Dataset {datasetName} already existing." );
+                    throw new PbiPushDatasetException(this, $"Dataset {datasetName} already existing.");
                 }
             }
 
             string modelBim = File.ReadAllText(model.FullName);
             TabModel.Database database = TabModel.JsonSerializer.DeserializeDatabase(modelBim);
-            var schema = SchemaBuilder.GetDatasetRequest( datasetName, database.Model, unsupportedMeasureAction, unsupportedRelationshipAction);
+            var schema = SchemaBuilder.GetDatasetRequest(datasetName, database.Model, unsupportedMeasureAction, unsupportedRelationshipAction);
 
-            // Version for single user
-            // ds = api.Datasets.PostDataset(schema, DefaultRetentionPolicy.BasicFIFO);
             ds = await _powerBIClient.Datasets.PostDatasetInGroupAsync(
-                groupId, 
-                schema, 
+                groupId,
+                schema,
                 fifoPolicy ? DefaultRetentionPolicy.BasicFIFO : DefaultRetentionPolicy.None
             );
 
             return ds.Id;
         }
 
+        /// <summary>
+        /// Updates the structure of a push dataset in the specified workspace using the TOM model retrieved from a model.bim file.
+        /// </summary>
+        /// <param name="model">Filename containing the TOM model in model.bim forma (JSON).</param>
+        /// <param name="groupId">The Group ID corresponding to the Power BI workspace containing the push dataset.</param>
+        /// <param name="datasetName">The name of the push dataset to update.</param>
+        /// <param name="unsupportedMeasureAction">Action to run for unsupported measures found in the model.</param>
+        /// <param name="unsupportedRelationshipAction">Action to run for unsupported relationships found in the model.</param>
+        /// <returns>List of updated tables in the push dataset.</returns>
         public async Task<List<string>> AlterPushDataset(
             FileInfo model,
             Guid groupId,
@@ -240,6 +313,15 @@ namespace Sqlbi.PbiPushDataset
             return await AlterPushDataset(model, groupId, new Guid(ds.Id), unsupportedMeasureAction, unsupportedRelationshipAction);
         }
 
+        /// <summary>
+        /// Updates the structure of a push dataset in the specified workspace using the TOM model retrieved from a model.bim file.
+        /// </summary>
+        /// <param name="model">Filename containing the TOM model in model.bim forma (JSON).</param>
+        /// <param name="groupId">The Group ID corresponding to the Power BI workspace containing the push dataset.</param>
+        /// <param name="datasetId">The dataset ID of the push dataset to update.</param>
+        /// <param name="unsupportedMeasureAction">Action to run for unsupported measures found in the model.</param>
+        /// <param name="unsupportedRelationshipAction">Action to run for unsupported relationships found in the model.</param>
+        /// <returns>List of updated tables in the push dataset.</returns>
         public async Task<List<string>> AlterPushDataset(
             FileInfo model,
             Guid groupId,
@@ -268,6 +350,13 @@ namespace Sqlbi.PbiPushDataset
             return updatedTables;
         }
 
+        /// <summary>
+        /// Remove all the rows from one or all the tables of a push dataset
+        /// </summary>
+        /// <param name="groupId">The Group ID corresponding to the Power BI workspace containing the push dataset.</param>
+        /// <param name="datasetName">The name of the push dataset.</param>
+        /// <param name="clearingTable">The table to clear. Pass null to clear all the tables.</param>
+        /// <returns>List of tables cleared in the push dataset.</returns>
         public async Task<List<string>> ClearPushDataset(Guid groupId, string datasetName, Action<string> clearingTable = null)
         {
             await Open();
@@ -281,12 +370,19 @@ namespace Sqlbi.PbiPushDataset
             return await ClearPushDataset(groupId, new Guid(ds.Id), clearingTable);
         }
 
-        public async Task<List<string>> ClearPushDataset( Guid groupId, Guid datasetId, Action<string> clearingTable = null)
+        /// <summary>
+        /// Remove all the rows from one or all the tables of a push dataset
+        /// </summary>
+        /// <param name="groupId">The Group ID corresponding to the Power BI workspace containing the push dataset.</param>
+        /// <param name="datasetId">The push dataset ID.</param>
+        /// <param name="clearingTable">The table to clear. Pass null to clear all the tables.</param>
+        /// <returns>List of tables cleared in the push dataset.</returns>
+        public async Task<List<string>> ClearPushDataset(Guid groupId, Guid datasetId, Action<string> clearingTable = null)
         {
             await Open();
             var clearedTables = new List<string>();
             var tables = await _powerBIClient.Datasets.GetTablesInGroupAsync(groupId, datasetId.ToString());
-            foreach( var t in tables.Value )
+            foreach (var t in tables.Value)
             {
                 clearingTable?.Invoke(t.Name);
                 await _powerBIClient.Datasets.DeleteRowsInGroupAsync(groupId, datasetId.ToString(), t.Name);
@@ -295,6 +391,13 @@ namespace Sqlbi.PbiPushDataset
             return clearedTables;
         }
 
+        /// <summary>
+        /// Runs a simulation writing rows in one or more tables of a push dataset at intervals specified by the simulator configuration.
+        /// </summary>
+        /// <param name="groupId">The Group ID corresponding to the Power BI workspace containing the push dataset.</param>
+        /// <param name="datasetName">The name of the push dataset.</param>
+        /// <param name="simulator">Configuration for the simulation.</param>
+        /// <returns>List of tables and number of rows written for each table.</returns>
         public async Task<List<(string, int)>> PushSimulation(Guid groupId, string datasetName, Simulator simulator)
         {
             await Open();
@@ -308,12 +411,19 @@ namespace Sqlbi.PbiPushDataset
             return await PushSimulation(groupId, new Guid(ds.Id), simulator);
         }
 
+        /// <summary>
+        /// Runs a simulation writing rows in one or more tables of a push dataset at intervals specified by the simulator configuration.
+        /// </summary>
+        /// <param name="groupId">The Group ID corresponding to the Power BI workspace containing the push dataset.</param>
+        /// <param name="datasetId">The push dataset ID.</param>
+        /// <param name="simulator">Configuration for the simulation.</param>
+        /// <returns>List of tables and number of rows written for each table.</returns>
         public async Task<List<(string, int)>> PushSimulation(Guid groupId, Guid datasetId, Simulator simulator)
         {
             await Open();
 
             var pushedTables = new List<(string, int)>();
-            foreach ( var table in simulator.Parameters.Tables )
+            foreach (var table in simulator.Parameters.Tables)
             {
                 List<object> rows = new List<object>();
                 for (int rowNumber = 0; rowNumber < table.BatchRows; rowNumber++)
@@ -327,11 +437,23 @@ namespace Sqlbi.PbiPushDataset
             return pushedTables;
         }
 
-        public async Task<List<(string,int)>> RefreshWithDax(
-            Guid groupId, string datasetName, 
-            string sourceWorkspace, string sourceDatabase, 
-            string dax, 
-            Action<string, int> refreshingTable = null, 
+        /// <summary>
+        /// Writes in tables of a push dataset the result obtained by running one or more DAX queries
+        /// on another dataset published on the same Power BI tenant (also on a different workspace).
+        /// </summary>
+        /// <param name="groupId">The Group ID corresponding to the Power BI workspace containing the push dataset.</param>
+        /// <param name="datasetName">The name of the push dataset to update.</param>
+        /// <param name="sourceWorkspace">The name of the workspace containing the dataset to use as a "data source".</param>
+        /// <param name="sourceDatabase">The name of the dataset to use as a "data source".</param>
+        /// <param name="dax">DAX queries to run over the source dataset.</param>
+        /// <param name="refreshingTable">Action to execute while updating the tables in the push dataset.</param>
+        /// <param name="clearTable">TRUE to overwrite destination tables in the push dataset, FALSE to append rows to existing data in the push dataset.</param>
+        /// <returns>List of tables and number of rows written for each table.</returns>
+        public async Task<List<(string, int)>> RefreshWithDax(
+            Guid groupId, string datasetName,
+            string sourceWorkspace, string sourceDatabase,
+            string dax,
+            Action<string, int> refreshingTable = null,
             bool clearTable = true)
         {
             await Open();
@@ -345,6 +467,18 @@ namespace Sqlbi.PbiPushDataset
             return await RefreshWithDax(groupId, new Guid(ds.Id), sourceWorkspace, sourceDatabase, dax, refreshingTable, clearTable);
         }
 
+        /// <summary>
+        /// Writes in tables of a push dataset the result obtained by running one or more DAX queries
+        /// on another dataset published on the same Power BI tenant (also on a different workspace).
+        /// </summary>
+        /// <param name="groupId">The Group ID corresponding to the Power BI workspace containing the push dataset.</param>
+        /// <param name="datasetId">The Dataset ID of the push dataset to update.</param>
+        /// <param name="sourceWorkspace">The name of the workspace containing the dataset to use as a "data source".</param>
+        /// <param name="sourceDatabase">The name of the dataset to use as a "data source".</param>
+        /// <param name="dax">DAX queries to run over the source dataset.</param>
+        /// <param name="refreshingTable">Action to execute while updating the tables in the push dataset.</param>
+        /// <param name="clearTable">TRUE to overwrite destination tables in the push dataset, FALSE to append rows to existing data in the push dataset.</param>
+        /// <returns>List of tables and number of rows written for each table.</returns>
         public async Task<List<(string, int)>> RefreshWithDax(
             Guid groupId, Guid datasetId,
             string sourceWorkspace, string sourceDatabase,
@@ -356,6 +490,17 @@ namespace Sqlbi.PbiPushDataset
             return await RefreshWithQuery(groupId, datasetId, connectionString, dax, refreshingTable, clearTable);
         }
 
+        /// <summary>
+        /// Writes in tables of a push dataset the result obtained by running one or more queries
+        /// on an ADOMD connection. For example, it can be used to run queries over Analysis Services instances.
+        /// </summary>
+        /// <param name="groupId">The Group ID corresponding to the Power BI workspace containing the push dataset.</param>
+        /// <param name="datasetId">The Dataset ID of the push dataset to update.</param>
+        /// <param name="connectionString">ADOMD connection string for the source database.</param>
+        /// <param name="query">Queries to run over the source database.</param>
+        /// <param name="refreshingTable">Action to execute while updating the tables in the push dataset.</param>
+        /// <param name="clearTable">TRUE to overwrite destination tables in the push dataset, FALSE to append rows to existing data in the push dataset.</param>
+        /// <returns>List of tables and number of rows written for each table.</returns>
         public async Task<List<(string, int)>> RefreshWithQuery(Guid groupId, Guid datasetId, string connectionString, string query, Action<string, int> refreshingTable = null, bool clearTable = true)
         {
             const int MAX_ROWS_PER_POST = 9000;
