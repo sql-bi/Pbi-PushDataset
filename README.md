@@ -2,7 +2,7 @@
 # Power BI Push Dataset tools
 ## Description
 The Power BI Push Dataset tools is a collection of libraries and tools to create Power BI real-time solutions based on push datasets.
-You can find a complete description of the architecture of such a solution at [SQLBI](https://www.sqlbi.com/)
+You can find a complete description of the architecture of such a solution at [SQLBI](https://www.sqlbi.com/?p=720608)
 
 There are three projects included in the repository:
 *	**Sqlbi.PbiPushDataset**: it is a library based on .NET Core 3.1, which is compatible with Azure Functions. This library could be used directly by your C# or .NET code if you do not want to rely on PowerShell or command-line tools to create the push dataset model. This library validates and translates regular Tabular models in Push Datasets, also providing helper functions to clear, populate, and simulate real-time transactions. The library is available as a [NuGet package](https://www.nuget.org/packages/Sqlbi.PbiPushDataset/).
