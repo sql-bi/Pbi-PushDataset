@@ -533,7 +533,7 @@ namespace Sqlbi.PbiPushTools
                 clearCommand,
                 simulateCommand
             };
-            rootCommand.Description = "Power BI Push Dataset Tools";
+            rootCommand.Description = $"Power BI Push Dataset Tools v.{typeof(CommandLine).Assembly.GetName().Version}";
             
             // Parse the incoming args and invoke the handler
             return rootCommand.InvokeAsync(args).Result;

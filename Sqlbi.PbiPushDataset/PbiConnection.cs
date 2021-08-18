@@ -351,7 +351,7 @@ namespace Sqlbi.PbiPushDataset
         }
 
         /// <summary>
-        /// Remove all the rows from one or all the tables of a push dataset
+        /// Remove all the rows from one or all the tables of a push dataset.
         /// </summary>
         /// <param name="groupId">The Group ID corresponding to the Power BI workspace containing the push dataset.</param>
         /// <param name="datasetName">The name of the push dataset.</param>

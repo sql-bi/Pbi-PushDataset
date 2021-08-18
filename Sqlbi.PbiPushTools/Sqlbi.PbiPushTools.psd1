@@ -9,7 +9,7 @@
 RootModule = 'Sqlbi.PbiPushTools.dll'
 
 # Version number of this module.
-ModuleVersion = '0.9.9'
+ModuleVersion = '1.0.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
