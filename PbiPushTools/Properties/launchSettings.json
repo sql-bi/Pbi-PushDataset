@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "PbiPushTools": {
-      "commandName": "Project",
-      "commandLineArgs": "PbiPushTools.exe refresh -p c8bb168c-455b-400f-b517-f23d040314f2 -s DAGG6G_T7c7FMc.g7-0oXi7QURZOxi8C.K -t f545bd66-7c3f-4729-851a-b7ca3ac9fb6e -g e028840f-524e-4470-97fd-21ebb4791210 -dn StudioPbiPush -rw powerbi://api.powerbi.com/v1.0/myorg/SQLBI%20Global -rd \"Sqlbi Commerce\" -x \"K:\\Dev\\PbiPush\\PbiPushTools\\populateCommerce.dax\" -ua 39a3159e-6fef-45eb-87d2-eff0a1835d4c -un unattended-sqlbi@sqlbi.com -up oVi1W-B3cnwe_zV-6+no"
-    }
-  }
-}

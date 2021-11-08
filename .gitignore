@@ -13,6 +13,9 @@ _nuget\
 *.userosscache
 *.sln.docstates
 
+# local info VS
+launchsettings.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

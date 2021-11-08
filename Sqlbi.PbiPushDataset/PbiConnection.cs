@@ -14,6 +14,19 @@ using System.Text.RegularExpressions;
 using System.Security;
 using System.Threading;
 
+/*
+ * TODO
+ * 
+ * In order to implement the RefreshWithDax using the Power BI REST API,
+ * we have to implement the following:
+ *   - Provide a folder path with a list of files, not just a single DAX file
+ *   - Each file must have a single DAX query
+ *   - When the DAX query contains the parameter @Rows and @Skip, replace them 
+ *     with the number of rows to include (less than or equal to 100,000) and 
+ *     the number of rows to skip. The sort order must be defined by the query author
+ *     If a query doesn't have a TOPNSKIP function, it cannot process more than 100,000 rows
+ * 
+ */
 namespace Sqlbi.PbiPushDataset
 {
     public class PbiPushDatasetException : Exception
