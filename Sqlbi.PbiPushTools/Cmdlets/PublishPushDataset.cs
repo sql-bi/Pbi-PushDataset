@@ -39,6 +39,10 @@ namespace Sqlbi.PbiPushTools.CmdLets
         [Parameter(Position = 6, Mandatory = false, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty()]
         public string DatasetId { get; set; }
+        
+        [Parameter(Position = 7, Mandatory = false, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
+        [ValidateNotNullOrEmpty()]
+        public bool RetentionPolicy { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -60,7 +64,7 @@ namespace Sqlbi.PbiPushTools.CmdLets
             var unsupportedMeasures = new List<TabModel.Measure>();
             var unsupportedRelationships = new List<TabModel.Relationship>();
             var groupId = new Guid(Group);
-            string newDatasetId = pbiConnection.CreatePushDataset(Model, groupId, DatasetName, false, false, DumpUnsupportedMeasure, DumpUnsupportedRelationship).Result;
+            string newDatasetId = pbiConnection.CreatePushDataset(Model, groupId, DatasetName, false, RetentionPolicy, DumpUnsupportedMeasure, DumpUnsupportedRelationship).Result;
 
             foreach (var unsupportedMeasure in unsupportedMeasures)
             {
