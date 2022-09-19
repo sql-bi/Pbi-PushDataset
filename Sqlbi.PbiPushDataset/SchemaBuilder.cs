@@ -165,7 +165,7 @@ namespace Sqlbi.PbiPushDataset
         /// </summary>
         /// <returns>The table.</returns>
         /// <param name="type">Type.</param>
-        public static Table GetTable(Type type)
+        public static Table GetTable(System.Type type)
         {
             var table = new Table()
             {
@@ -260,7 +260,7 @@ namespace Sqlbi.PbiPushDataset
         /// </summary>
         /// <returns>The data type.</returns>
         /// <param name="type">Type.</param>
-        static string GetDataType(Type type)
+        static string GetDataType(System.Type type)
         {
             string dataType = type.Name switch
             {

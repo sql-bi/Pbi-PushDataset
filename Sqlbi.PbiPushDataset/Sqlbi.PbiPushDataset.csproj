@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<Company>SQLBI</Company>
 	<Authors>Marco Russo</Authors>
@@ -13,7 +13,7 @@
 	<PackageIconUrl>https://www.sqlbi.com/wp-content/uploads/PbiPushDataset.svg</PackageIconUrl>
     <PackageIcon>PbiPushDataset.png</PackageIcon>
 	<PackageTags>Power BI, Push Dataset</PackageTags>
-	<Version>1.0.0</Version>
+	<Version>1.1.0</Version>
   </PropertyGroup>
 	
 	<ItemGroup>
@@ -22,11 +22,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-    <PackageReference Include="Microsoft.AnalysisServices.AdomdClient.NetCore.retail.amd64" Version="19.24.4" />
-    <PackageReference Include="Microsoft.AnalysisServices.NetCore.retail.amd64" Version="19.24.4" />
-    <PackageReference Include="Microsoft.PowerBI.Api" Version="3.27.0" />
-    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="2.3.23" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Microsoft.AnalysisServices.AdomdClient.NetCore.retail.amd64" Version="19.48.0" />
+    <PackageReference Include="Microsoft.AnalysisServices.NetCore.retail.amd64" Version="19.48.0" />
+    <PackageReference Include="Microsoft.PowerBI.Api" Version="4.10.0" />
+    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="2.3.24" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
 </Project>

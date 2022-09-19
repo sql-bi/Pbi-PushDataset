@@ -9,7 +9,7 @@
 RootModule = 'Sqlbi.PbiPushTools.dll'
 
 # Version number of this module.
-ModuleVersion = '1.0.0'
+ModuleVersion = '1.1.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -30,8 +30,8 @@ Copyright = '(c) SQLBI Corp. All rights reserved.'
 Description = 'Validate and translate regular Tabular models in Push Datasets, also providing helper functions to clear, populate, and simulate real-time transactions.'
 
 # Minimum version of the PowerShell engine required by this module
-# Using PowerShell 7.0 the minimum CLR is alread .NET Core 3.1
-PowerShellVersion = '7.0'
+# Using PowerShell 7.2 the minimum CLR is .NET 6.0
+PowerShellVersion = '7.2'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
